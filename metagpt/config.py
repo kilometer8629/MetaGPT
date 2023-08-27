@@ -45,13 +45,12 @@ class Config(metaclass=Singleton):
         self.global_proxy = self._get("GLOBAL_PROXY")
         self.openai_api_key = self._get("OPENAI_API_KEY")
         self.anthropic_api_key = self._get("Anthropic_API_KEY")
-        if (not self.openai_api_key or "YOUR_API_KEY" == self.openai_api_key) and (
-            not self.anthropic_api_key or "YOUR_API_KEY" == self.anthropic_api_key
+        if (not self.openai_api_key or self.openai_api_key == "YOUR_API_KEY") and (
+            not self.anthropic_api_key or self.anthropic_api_key == "YOUR_API_KEY"
         ):
             raise NotConfiguredException("Set OPENAI_API_KEY or Anthropic_API_KEY first")
         self.openai_api_base = self._get("OPENAI_API_BASE")
-        openai_proxy = self._get("OPENAI_PROXY") or self.global_proxy
-        if openai_proxy:
+        if openai_proxy := self._get("OPENAI_PROXY") or self.global_proxy:
             openai.proxy = openai_proxy
             openai.api_base = self.openai_api_base
         self.openai_api_type = self._get("OPENAI_API_TYPE")
@@ -85,7 +84,7 @@ class Config(metaclass=Singleton):
 
     def _init_with_config_files_and_env(self, configs: dict, yaml_file):
         """从config/key.yaml / config/config.yaml / env三处按优先级递减加载"""
-        configs.update(os.environ)
+        configs |= os.environ
 
         for _yaml_file in [yaml_file, self.key_yaml_file]:
             if not _yaml_file.exists():
@@ -96,8 +95,8 @@ class Config(metaclass=Singleton):
                 yaml_data = yaml.safe_load(file)
                 if not yaml_data:
                     continue
-                os.environ.update({k: v for k, v in yaml_data.items() if isinstance(v, str)})
-                configs.update(yaml_data)
+                os.environ |= {k: v for k, v in yaml_data.items() if isinstance(v, str)}
+                configs |= yaml_data
 
     def _get(self, *args, **kwargs):
         return self._configs.get(*args, **kwargs)
