@@ -33,7 +33,7 @@ class SearchEngine:
         engine = engine or CONFIG.search_engine
         if engine == SearchEngineType.SERPAPI_GOOGLE:
             module = "metagpt.tools.search_engine_serpapi"
-            run_func = importlib.import_module(module).SerpAPIWrapper().run            
+            run_func = importlib.import_module(module).SerpAPIWrapper().run
         elif engine == SearchEngineType.SERPER_GOOGLE:
             module = "metagpt.tools.search_engine_serper"
             run_func = importlib.import_module(module).SerperWrapper().run
@@ -43,9 +43,7 @@ class SearchEngine:
         elif engine == SearchEngineType.DUCK_DUCK_GO:
             module = "metagpt.tools.search_engine_ddg"
             run_func = importlib.import_module(module).DDGAPIWrapper().run
-        elif engine == SearchEngineType.CUSTOM_ENGINE:
-            pass  # run_func = run_func
-        else:
+        elif engine != SearchEngineType.CUSTOM_ENGINE:
             raise NotImplementedError
         self.engine = engine
         self.run_func = run_func
